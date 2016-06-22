@@ -144,7 +144,7 @@ function isCurrency(currency) {
 
 function configError(config) {
   print.error(`Configuration error: ${config} is missing, aborting.\n`
-            + `Please have look at the README or your user.config.js in the config folder.`);
+            + `Please have look at the README or your user.config in the config folder.`);
   process.exit();
 }
 
