@@ -3,11 +3,11 @@ const cli = require('commander');
 const chalk = require('chalk');
 
 /* ===== DEBUG CONFIG ===== */
-const debugEnabled = true;
+const debugEnabled = false;
 
 /* ===== CLI CONFIG ===== */
 cli
-  .version('0.0.1')
+  .version('0.1.5')
   .option('-p, --print', 'print the current configuration')
   .option('-i, --intervall [time of intervall]', 'update intervall')
   .option('-d, --day [day bought]', 'day bought')
