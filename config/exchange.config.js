@@ -1,0 +1,16 @@
+module.exports = [
+  'XETHZCAD',
+  'XETHZEUR',
+  'XETHZGBP',
+  'XETHZJPY',
+  'XETHZUSD',
+  'XLTCZCAD',
+  'XLTCZEUR',
+  'XLTCZUSD',
+  'XETHXXBT',
+  'XXBTXLTC',
+  'XXBTXNMC',
+  'XXBTXXDG',
+  'XXBTXXLM',
+  'XXBTXXRP'
+]
