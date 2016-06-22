@@ -7,7 +7,8 @@ const krakenClient = require('kraken-api');
 const moment = require('moment');
 const clearBash = require('clear');
 const chart = require('chart');
-const jsonFile = require('jsonfile')
+const jsonFile = require('jsonfile');
+const fileExists = require('file-exists');
 
 /* ===== LOAD CONFIG FILES ===== */
 let userConfig = {
@@ -34,23 +35,24 @@ let pastExchangeRate = [];
 
 /* ===== FUNCTIONS ===== */
 (function initialiser() {
-  jsonFile.readFile('config/user.config.json', function(err, savedConfig) {
-    if (savedConfig) { userConfig = savedConfig; }
+  if (fileExists('config/user.config.json')) {
+    userConfig = jsonFile.readFileSync('config/user.config.json');
+  }
 
-    if (cli.print) {
-      printConfig();
-      process.exit();
-    }
-    if (cli.intervall) { userConfig.updateIntervall = cli.intervall }
-    if (cli.day) { userConfig.dayBought = cli.day }
-    if (cli.key) { userConfig.kraken.api_key = cli.key }
-    if (cli.secret) { userConfig.kraken.api_secret = cli.secret }
-    if (cli.currency) { userConfig.zCurrency = isCurrency(cli.currency) ? cli.currency : undefined }
-    if (cli.chartWidth) { userConfig.chart.width = cli.chartWidth }
-    if (cli.chartHeight) { userConfig.chart.height = cli.chartHeight }
+  if (cli.print) {
+    printConfig();
+    process.exit();
+  }
+  
+  if (cli.intervall) { userConfig.updateIntervall = cli.intervall }
+  if (cli.day) { userConfig.dayBought = cli.day }
+  if (cli.key) { userConfig.kraken.api_key = cli.key }
+  if (cli.secret) { userConfig.kraken.api_secret = cli.secret }
+  if (cli.currency) { userConfig.zCurrency = isCurrency(cli.currency) ? cli.currency : undefined }
+  if (cli.chartWidth) { userConfig.chart.width = cli.chartWidth }
+  if (cli.chartHeight) { userConfig.chart.height = cli.chartHeight }
 
-    validateConfig();
-  })
+  validateConfig();
 })();
 
 function validateConfig() {

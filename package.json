@@ -15,6 +15,7 @@
     "chart": "github:jstrace/chart",
     "clear": "0.0.1",
     "commander": "^2.9.0",
+    "file-exists": "^1.0.0",
     "jsonfile": "^2.3.1",
     "kraken-api": "^0.1.7",
     "lodash": "^4.11.1",
