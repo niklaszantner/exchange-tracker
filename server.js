@@ -94,6 +94,7 @@ function getCurrrentValue() {
     let exchangeRate = _.round(tickerAsk, 4);
     let depositValue = etherBalance * exchangeRate;
 
+    yolo
     clearBash();
 
     print.header(moment().format('DD.MM.YY HH:mm:ss') + daysToGoNotificatoin + '\n');
@@ -101,6 +102,9 @@ function getCurrrentValue() {
     print.info(`Exchange  (${userConfig.zCurrency} to ETH)  ` + exchangeRate);
     print.info('Balance   (ETH)         ' + etherBalance);
     print.info(`Balance   (${userConfig.zCurrency})         ` + depositValue);
+  }).catch(function(values) {
+    print.error(values);
+    process.exit();
   });
 }
 

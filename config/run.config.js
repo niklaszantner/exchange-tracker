@@ -3,7 +3,7 @@ const cli = require('commander');
 const chalk = require('chalk');
 
 /* ===== DEBUG CONFIG ===== */
-const debugEnabled = false;
+const debugEnabled = true;
 
 /* ===== CLI CONFIG ===== */
 cli
