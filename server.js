@@ -94,7 +94,6 @@ function getCurrrentValue() {
     let exchangeRate = _.round(tickerAsk, 4);
     let depositValue = etherBalance * exchangeRate;
 
-    yolo
     clearBash();
 
     print.header(moment().format('DD.MM.YY HH:mm:ss') + daysToGoNotificatoin + '\n');
