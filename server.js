@@ -9,6 +9,7 @@ const clearBash = require('clear');
 const chart = require('chart');
 const jsonFile = require('jsonfile');
 const fileExists = require('file-exists');
+const fs = require('fs');
 
 /* ===== LOAD CONFIG FILES ===== */
 let userConfig = {
@@ -35,15 +36,15 @@ let pastExchangeRate = [];
 
 /* ===== FUNCTIONS ===== */
 (function initialiser() {
-  if (fileExists('config/user.config.json')) {
-    userConfig = jsonFile.readFileSync('config/user.config.json');
+  if (fileExists(__dirname + '/config/user.config.json')) {
+    userConfig = jsonFile.readFileSync(__dirname + '/config/user.config.json');
   }
 
   if (cli.print) {
     printConfig();
     process.exit();
   }
-  
+
   if (cli.intervall) { userConfig.updateIntervall = cli.intervall }
   if (cli.day) { userConfig.dayBought = cli.day }
   if (cli.key) { userConfig.kraken.api_key = cli.key }
@@ -64,9 +65,9 @@ function validateConfig() {
   if (!userConfig.chart.height) { configError('chartHeight') }
 
   if (!runConfig.debugEnabled) {
-    jsonFile.writeFile('config/user.config.json', userConfig, function(error) {
+    jsonFile.writeFile(__dirname + '/config/user.config.json', userConfig, function(error) {
       if (error) {
-        print.error(error);
+        print.error('Could no write into file \n' + error);
         process.exit();
       }
     })
