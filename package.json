@@ -5,7 +5,8 @@
   "description": "ether-tracker is a small nodejs based application to track Ethereum related information by utilising the APIs provided by kraken.com.",
   "main": "server.js",
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "start": "node server.js"
   },
   "author": "me",
   "license": "ISC",
@@ -23,5 +24,25 @@
   "bin": {
     "ether-tracker": "./server.js"
   },
-  "preferGlobal": "true"
+  "preferGlobal": "true",
+  "devDependencies": {},
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/nobol/ether-tracker.git"
+  },
+  "keywords": [
+    "ethereum",
+    "tracker",
+    "bash",
+    "command",
+    "line",
+    "graph",
+    "balance",
+    "exchange",
+    "rate"
+  ],
+  "bugs": {
+    "url": "https://github.com/nobol/ether-tracker/issues"
+  },
+  "homepage": "https://github.com/nobol/ether-tracker#readme"
 }

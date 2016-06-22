@@ -20,7 +20,7 @@ The CLI provides some options to be set by user on starting the tracker.
 
 This is how one could start the tracker:
 ```
-node . -k KEY -s SECRET  -c EUR -d 2016-01-13
+ether-tracker -k KEY -s SECRET  -c EUR -d 2016-01-13 -i 120
 ```
 All the configurations get saved in 'config/user.config.json'. Evertime you update a config parameter, the old one gets overridden.
 
@@ -62,7 +62,7 @@ Possible options for `exchangeKey`
 - `XRP`
 
 ### Copyright/Licensing
-MIT
+ISC
 
 ### Donate
 You can send me some ether of course: `0xb2d99852734c18c3c7036bf1a1b1992ab4bfc679`
