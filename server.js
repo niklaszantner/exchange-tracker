@@ -1,17 +1,20 @@
 #!/usr/bin/env node
 
-/* ===== NPM PACKAGES ===== */
+/* ===== NPM AND LOCAL DEPENDENCIES ===== */
 const _ = require('lodash');
 const q = require('q');
 const krakenClient = require('kraken-api');
 const moment = require('moment');
 const clearBash = require('clear');
-const chart = require('chart');
 const jsonFile = require('jsonfile');
 const fileExists = require('file-exists');
 const fs = require('fs');
+const chart = require('./chart.js');
+const cursor = require('ansi')(process.stdout);
 
 /* ===== LOAD CONFIG FILES ===== */
+cursor.hide();
+
 let userConfig = {
   kraken: {
     api_key:    '',
@@ -22,16 +25,26 @@ let userConfig = {
   zCurrency: '',
   chart: {
     width: 85,
-    height: 16
+    height: 15
   }
 };
 
 const runConfig = require("./config/run.config.js");
 const exchangeConfig = require("./config/exchange.config.js");
+let MIN_VALUE = 0;
+
+process.on('exit', function () {
+  cursor.show().write('\n');
+})
+
+process.on('SIGINT', function () {
+  process.exit();
+})
 
  /* ===== VARIABLES ===== */
-let cli = runConfig.cli;
-let print = runConfig.print;
+const cli = runConfig.cli;
+const print = runConfig.print;
+const printInLine = runConfig.printInLine;
 let pastExchangeRate = [];
 
 /* ===== FUNCTIONS ===== */
@@ -86,24 +99,26 @@ function getCurrrentValue() {
   const kraken = new krakenClient(userConfig.kraken.api_key, userConfig.kraken.api_secret);
 
   q.all([useKrakenAPI(kraken, 'Balance', null), useKrakenAPI(kraken, 'Ticker', {"pair": exchangeKey})])
-   .then(function(values) {
-    let ticker = values[1];
+   .then(function(results) {
+    let ticker = results[1];
     let tickerAsk = ticker[Object.keys(ticker)[0]].a[0];
 
-    let etherBalance = values[0].XETH;
+    let etherBalance = results[0].XETH;
     let exchangeRate = _.round(tickerAsk, 4);
     let depositValue = etherBalance * exchangeRate;
+    let plottedChart = updateChart(pastExchangeRate, exchangeRate);
 
     clearBash();
 
     print.header(moment().format('DD.MM.YY HH:mm:ss') + daysToGoNotificatoin + '\n');
-    print.white(updateChart(pastExchangeRate, exchangeRate) + '\n');
+    print.white(plottedChart + '\n');
     print.info(`Exchange  (${userConfig.zCurrency} to ETH)  ` + exchangeRate);
     print.info('Balance   (ETH)         ' + etherBalance);
-    print.info(`Balance   (${userConfig.zCurrency})         ` + depositValue);
-  }).catch(function(values) {
-    print.error(values);
-    process.exit();
+    print.info(`Balance   (${userConfig.zCurrency})         ` + depositValue + '\n');
+    printInLine.green('Status    Good');
+  }, function(errors) {
+    print.red('Status    Error occurd, waiting for next sync');
+    print.red(errors);
   });
 }
 
@@ -118,16 +133,36 @@ function useKrakenAPI(kraken, api, option) {
 
 // update and draw the chart
 function updateChart(data, dataSet) {
-  if (data.length >= ((userConfig.chart.width - 12) / 2) ) { data.shift(); }
+  if (data.length >= ((userConfig.chart.width - 12) / 2)) { data.shift(); }
   data.push(dataSet);
 
-  return (chart(data,
-    {width: userConfig.chart.width, height: userConfig.chart.height, padding: 1}
-  ));
+  return chart(data, userConfig.chart.width, userConfig.chart.height, relativeMinValue(data));
+}
+
+function absoluteMinValue(data) {
+  return Math.floor(_.min(data) * 0.9);
+}
+
+function relativeMinValue(data) {
+  if (data.length === 1) {
+    MIN_VALUE = Math.floor(data[0] * 0.9);
+  } else {
+    let delta = Math.abs(data[data.length - 1] - data[data.length - 2]);
+    minBase = _.min([data[data.length - 2], data[data.length - 1]]);
+
+    if (delta === 0) {
+      return MIN_VALUE;
+    } else {
+      MIN_VALUE = minBase - 4 * delta;
+    }
+  }
+
+   MIN_VALUE = _.round(MIN_VALUE, 4);
+   return MIN_VALUE;
 }
 
 function printConfig() {
-  print.white('Update intervall:    ' + userConfig.updateIntervall);
+  print.white('Update intervall:    ' + userConfig.updateIntervall + ' seconds');
   print.white('Exchange currency:   ' + userConfig.zCurrency);
   print.white('Chart width:         ' + userConfig.chart.width);
   print.white('Chart heigh:         ' + userConfig.chart.height);
