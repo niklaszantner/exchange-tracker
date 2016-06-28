@@ -1,7 +1,7 @@
 {
   "name": "ether-tracker",
   "private": false,
-  "version": "1.0.0",
+  "version": "1.0.1",
   "description": "ether-tracker is a small nodejs based application to track Ethereum related information by utilising the APIs provided by kraken.com.",
   "main": "server.js",
   "scripts": {
