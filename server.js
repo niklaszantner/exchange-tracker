@@ -3,61 +3,58 @@
 /* ===== NPM AND LOCAL DEPENDENCIES ===== */
 const _ = require('lodash');
 const q = require('q');
-const krakenClient = require('kraken-api');
 const moment = require('moment');
 const clearBash = require('clear');
 const jsonFile = require('jsonfile');
 const fileExists = require('file-exists');
 const fs = require('fs');
-const chart = require('./chart.js');
+const chart = require('./app/chart/chart.js');
 const cursor = require('ansi')(process.stdout);
+const krakenService = require('./app/kraken/kraken.service');
+const Logger = require('./app/logger/logger.service');
 
-/* ===== LOAD CONFIG FILES ===== */
-cursor.hide();
-
-let userConfig = {
-  kraken: {
-    api_key:    '',
-    api_secret: ''
-  },
-  updateIntervall: 60,
-  dayBought: '',
-  zCurrency: '',
-  chart: {
-    width: 85,
-    height: 15
-  }
-};
-
-const runConfig = require("./config/run.config.js");
-const exchangeConfig = require("./config/exchange.config.js");
-let MIN_VALUE = 0;
+/* ===== DEFAULT CONFIG ===== */
+const runConfig = require("./app/config/run.config.js");
+const exchangeConfig = require("./app/config/exchange.config.js");
 
 process.on('exit', function () {
   cursor.show().write('\n');
-})
+});
 
 process.on('SIGINT', function () {
   process.exit();
-})
+});
 
  /* ===== VARIABLES ===== */
 const cli = runConfig.cli;
 const print = runConfig.print;
 const printInLine = runConfig.printInLine;
+let userConfig = runConfig.userConfig;
 let pastExchangeRate = [];
+let MIN_VALUE = 0;
+
+let lastFetch = {
+  plottedChart: '-',
+  exchangeRate: '-',
+  etherBalance: '-',
+  depositValue: '-'
+};
 
 /* ===== FUNCTIONS ===== */
 (function initialiser() {
+  cursor.hide();
+
   if (fileExists(__dirname + '/config/user.config.json')) {
     userConfig = jsonFile.readFileSync(__dirname + '/config/user.config.json');
   }
 
   if (cli.print) {
     printConfig();
+    cursor.show().write('\n');
     process.exit();
   }
 
+  if (cli.log) { userConfig.logEnabled = Boolean(cli.log) }
   if (cli.intervall) { userConfig.updateIntervall = cli.intervall }
   if (cli.day) { userConfig.dayBought = cli.day }
   if (cli.key) { userConfig.kraken.api_key = cli.key }
@@ -86,79 +83,53 @@ function validateConfig() {
     })
   }
 
-  getCurrrentValue();
-  setInterval(getCurrrentValue, userConfig.updateIntervall * 1000);
+  getCurrrentData();
+  setInterval(getCurrrentData, userConfig.updateIntervall * 1000);
 }
 
 // get currentValue of owned eth in euro
-function getCurrrentValue() {
+function getCurrrentData() {
+  const exchangeKey = exchangeConfig.find(str => contains(str, userConfig.zCurrency));
+
+  q.all([krakenService.exchangeService(userConfig.kraken.api_key, userConfig.kraken.api_secret, 'Balance', null),
+         krakenService.exchangeService(userConfig.kraken.api_key, userConfig.kraken.api_secret, 'Ticker', {"pair": exchangeKey})])
+    .then(function(results) {
+      let ticker = results[1];
+      let tickerAsk = ticker[Object.keys(ticker)[0]].a[0];
+      
+      let etherBalance = results[0].XETH;
+      let exchangeRate = _.round(tickerAsk, 4);
+      let depositValue = etherBalance * exchangeRate;
+      let plottedChart = chart.update(pastExchangeRate, exchangeRate, userConfig.chart.width, userConfig.chart.height);
+
+      lastFetch.plottedChart = plottedChart;
+      lastFetch.exchangeRate = exchangeRate;
+      lastFetch.etherBalance = etherBalance;
+      lastFetch.depositValue = depositValue;
+
+      if (userConfig.logEnabled) { Logger.save(lastFetch); }
+
+      updateInterface(false, 'GOOD');
+  }, function(errors) {
+      updateInterface(true, erros);
+  });
+}
+
+function updateInterface(isError, status) {
+  clearBash();
+
+  let timeStamp = moment().format('DD.MM.YY HH:mm:ss');
   let daysToGoNotificatoin = (!_.isEmpty(userConfig.dayBought)) ?
           ' | Days to go: ' + (365 + moment(userConfig.dayBought).diff(moment(), 'days')) : '';
 
-  const exchangeKey = exchangeConfig.find(str => contains(str, userConfig.zCurrency));
-  const kraken = new krakenClient(userConfig.kraken.api_key, userConfig.kraken.api_secret);
+  print.header(timeStamp + daysToGoNotificatoin + '\n');
+  print.white(lastFetch.plottedChart + '\n');
+  print.info(`Exchange  (${userConfig.zCurrency} to ETH)  ` + lastFetch.exchangeRate);
+  print.info('Balance   (ETH)         '                     + lastFetch.etherBalance);
+  print.info(`Balance   (${userConfig.zCurrency})         ` + lastFetch.depositValue + '\n');
 
-  q.all([useKrakenAPI(kraken, 'Balance', null), useKrakenAPI(kraken, 'Ticker', {"pair": exchangeKey})])
-   .then(function(results) {
-    let ticker = results[1];
-    let tickerAsk = ticker[Object.keys(ticker)[0]].a[0];
-
-    let etherBalance = results[0].XETH;
-    let exchangeRate = _.round(tickerAsk, 4);
-    let depositValue = etherBalance * exchangeRate;
-    let plottedChart = updateChart(pastExchangeRate, exchangeRate);
-
-    clearBash();
-
-    print.header(moment().format('DD.MM.YY HH:mm:ss') + daysToGoNotificatoin + '\n');
-    print.white(plottedChart + '\n');
-    print.info(`Exchange  (${userConfig.zCurrency} to ETH)  ` + exchangeRate);
-    print.info('Balance   (ETH)         ' + etherBalance);
-    print.info(`Balance   (${userConfig.zCurrency})         ` + depositValue + '\n');
-    printInLine.green('Status    Good');
-  }, function(errors) {
-    print.red('Status    Error occurd, waiting for next sync');
-    print.red(errors);
-  });
-}
-
-// use a specific kraken api with options
-function useKrakenAPI(kraken, api, option) {
-  return new Promise(function (fulfill, reject) {
-    kraken.api(api, option, function(error, data) {
-      (error) ? reject(error) : fulfill(data.result);
-    });
-  });
-}
-
-// update and draw the chart
-function updateChart(data, dataSet) {
-  if (data.length >= ((userConfig.chart.width - 12) / 2)) { data.shift(); }
-  data.push(dataSet);
-
-  return chart(data, userConfig.chart.width, userConfig.chart.height, relativeMinValue(data));
-}
-
-function absoluteMinValue(data) {
-  return Math.floor(_.min(data) * 0.9);
-}
-
-function relativeMinValue(data) {
-  if (data.length === 1) {
-    MIN_VALUE = Math.floor(data[0] * 0.9);
-  } else {
-    let delta = Math.abs(data[data.length - 1] - data[data.length - 2]);
-    minBase = _.min([data[data.length - 2], data[data.length - 1]]);
-
-    if (delta === 0) {
-      return MIN_VALUE;
-    } else {
-      MIN_VALUE = minBase - 4 * delta;
-    }
-  }
-
-   MIN_VALUE = _.round(MIN_VALUE, 4);
-   return MIN_VALUE;
+  isError ? printInLine.red(`Error occurd, waiting for next sync \n ${status}`) :
+            printInLine.green(`Status    ${status}`);
 }
 
 function printConfig() {
@@ -182,7 +153,7 @@ function configError(config) {
   process.exit();
 }
 
-///////////
+/* ===== HELPER FUNCTIONS ===== */
 
 function contains(array, subArray) {
   return array.indexOf(subArray) > -1;

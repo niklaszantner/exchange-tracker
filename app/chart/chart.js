@@ -3,9 +3,17 @@ const matrix = require('array-matrix');
 const _ = require('lodash');
 
 /* ===== EXPOSE `chart()` ===== */
-module.exports = toChart;
+module.exports.draw = draw;
+module.exports.update = update;
 
-function toChart(data, width, height, minValue) {
+function update(data, dataSet, width, height) {
+  if (data.length >= ((width - 12) / 2)) { data.shift(); }
+  data.push(dataSet);
+
+  return draw(data, width, height, relativeMinValue(data));
+}
+
+function draw(data, width, height, minValue) {
   width = width || 130;
   height = height || 30;
   minValue = minValue || 0;
@@ -64,4 +72,28 @@ function matrixToString(output) {
   let buffer = [];
   _.forEach(output, char => buffer.push(char.join('')));
   return buffer.join('\n');
+}
+
+/* ===== HELPER FUNCTIONS ===== */
+
+function absoluteMinValue(data) {
+  return Math.floor(_.min(data) * 0.9);
+}
+
+function relativeMinValue(data) {
+  if (data.length === 1) {
+    MIN_VALUE = Math.floor(data[0] * 0.9);
+  } else {
+    let delta = Math.abs(data[data.length - 1] - data[data.length - 2]);
+    minBase = _.min([data[data.length - 2], data[data.length - 1]]);
+
+    if (delta === 0) {
+      return MIN_VALUE;
+    } else {
+      MIN_VALUE = minBase - 4 * delta;
+    }
+  }
+
+  MIN_VALUE = _.round(MIN_VALUE, 4);
+  return MIN_VALUE;
 }

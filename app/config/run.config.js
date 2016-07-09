@@ -3,7 +3,7 @@ const cli = require('commander');
 const chalk = require('chalk');
 
 /* ===== DEBUG CONFIG ===== */
-const debugEnabled = false;
+const debugEnabled = true;
 
 /* ===== CLI CONFIG ===== */
 cli
@@ -16,14 +16,32 @@ cli
   .option('-c, --currency [exchange currency]', 'currency to exchange, options in the README')
   .option('-w, --chartWidth [width of chart]', 'width of the chart in chars')
   .option('-h, --chartHeight [height of chart]', 'height of the chart in chars')
+  .option('-l, --log [true or false]', 'enables or disables the log')
   .usage('\n'
        + '\n  Changelog: https://github.com/nobol/ether-tracker/blob/master/CHANGELOG.md'
        + '\n  Readme:    https://github.com/nobol/ether-tracker/blob/master/README.md')
   .parse(process.argv);
 
+/* ===== DEFAULT USER CONFIG */
+let userConfig = {
+  kraken: {
+    api_key:    '',
+    api_secret: ''
+  },
+  updateIntervall: 60,
+  dayBought: '',
+  zCurrency: '',
+  chart: {
+    width: 85,
+    height: 15
+  },
+  logEnabled: false
+};
+
 module.exports = {
   debugEnabled: debugEnabled,
   cli: cli,
+  userConfig: userConfig,
   print: {
     error:  (content) => { console.log(chalk.red.bgWhite(content)) },
     info:   (content) => { console.log(chalk.cyan(content)) },
@@ -37,6 +55,7 @@ module.exports = {
             (content) => { return; }
   },
   printInLine: {
-    green:  (content) => { process.stdout.write(chalk.green(content)) }
+    green:  (content) => { process.stdout.write(chalk.green(content)) },
+    red:  (content) => { process.stdout.write(chalk.red(content)) }
   }
 };
