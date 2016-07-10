@@ -31,7 +31,7 @@ Simply via npm `npm install -g ether-tracker`
 And start the program by typing `ether-tracker` into your command line.
 
 ### Kraken API
-To use this tracker you need to specify a Kraken API key and secret. Simply login to kraken, go [here](https://www.kraken.com/u/settings/api) and generate a new key. I would suggest to only check the box entitled with *Query Funds* as this is the only one you actually need. After generating you can simply copy paste the key and secret into your console.
+To use this tracker you can specify a kraken API key and secret, so your current founds can be queried and displayed. Simply login to kraken, go [here](https://www.kraken.com/u/settings/api) and generate a new key. I would suggest to only check the box entitled with *Query Funds* as this is the only one you actually need. After generating you can simply copy paste the key and secret into your console.
 
 ### CLI
 The CLI provides some options to be set by user on starting the tracker.  
