@@ -2,6 +2,9 @@
 const matrix = require('array-matrix');
 const _ = require('lodash');
 
+/* ===== VARIABLES ===== */
+let MIN_VALUE = 0;
+
 /* ===== EXPOSE `chart()` ===== */
 module.exports.draw = draw;
 module.exports.update = update;
@@ -10,7 +13,7 @@ function update(data, dataSet, width, height) {
   if (data.length >= ((width - 12) / 2)) { data.shift(); }
   data.push(dataSet);
 
-  return draw(data, width, height, relativeMinValue(data));
+  return draw(data, width, height, relativeMinValue(data, 4));
 }
 
 function draw(data, width, height, minValue) {
@@ -54,9 +57,9 @@ function draw(data, width, height, minValue) {
     dataValue = dataValue - minValue;
 
     let relativeHeight = Math.round((height - 2) * (dataValue / (maxValue - minValue)));
-    let color = relativeHeight < 0 ? '░' : '█';
+    let color = relativeHeight < 0 ? ' ' : '█';
 
-    if (relativeHeight < 0) { relativeHeight = -relativeHeight };
+    if (relativeHeight < 0) { relativeHeight = -relativeHeight; }
 
     while (relativeHeight--) {
       output[Math.abs(relativeHeight - height) - 2][currentXYPosition] = color;
@@ -75,22 +78,22 @@ function matrixToString(output) {
 }
 
 /* ===== HELPER FUNCTIONS ===== */
+function relativeMinValue(data, zoom) {
+  const defaultZoom = 0.9;
 
-function absoluteMinValue(data) {
-  return Math.floor(_.min(data) * 0.9);
-}
-
-function relativeMinValue(data) {
   if (data.length === 1) {
-    MIN_VALUE = Math.floor(data[0] * 0.9);
+    MIN_VALUE = Math.floor(data[0] * defaultZoom);
   } else {
     let delta = Math.abs(data[data.length - 1] - data[data.length - 2]);
     minBase = _.min([data[data.length - 2], data[data.length - 1]]);
 
     if (delta === 0) {
       return MIN_VALUE;
+    } else if (MIN_VALUE > _.min(data)) {
+      MIN_VALUE = _.min(data) * defaultZoom;
+      console.log(MIN_VALUE);
     } else {
-      MIN_VALUE = minBase - 4 * delta;
+      MIN_VALUE = minBase - zoom * delta;
     }
   }
 

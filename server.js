@@ -31,7 +31,6 @@ const print = runConfig.print;
 const printInLine = runConfig.printInLine;
 let userConfig = runConfig.userConfig;
 let pastExchangeRate = [];
-let MIN_VALUE = 0;
 
 let lastFetch = {
   plottedChart: '-',
@@ -67,8 +66,6 @@ let lastFetch = {
 })();
 
 function validateConfig() {
-  if (!userConfig.kraken.api_key) { configError('kraken.api_key')}
-  if (!userConfig.kraken.api_secret) { configError('kraken.api_secret') }
   if (!userConfig.updateIntervall) { configError('updateIntervall') }
   if (!userConfig.zCurrency) { configError('zCurrency') }
   if (!userConfig.chart.width) { configError('chartWidth') }
@@ -90,28 +87,32 @@ function validateConfig() {
 // get currentValue of owned eth in euro
 function getCurrrentData() {
   const exchangeKey = exchangeConfig.find(str => contains(str, userConfig.zCurrency));
+  const tickerPromise = krakenService.exchangeService(null, null, 'Ticker', {"pair": exchangeKey});
+  let balancePromise = null;
 
-  q.all([krakenService.exchangeService(userConfig.kraken.api_key, userConfig.kraken.api_secret, 'Balance', null),
-         krakenService.exchangeService(userConfig.kraken.api_key, userConfig.kraken.api_secret, 'Ticker', {"pair": exchangeKey})])
-    .then(function(results) {
+  if (userConfig.kraken.api_key && userConfig.kraken.api_secret) {
+    balancePromise = krakenService.exchangeService(userConfig.kraken.api_key, userConfig.kraken.api_secret, 'Balance', null);
+  }
+
+  q.all([balancePromise, tickerPromise]).then(function(results) {
       let ticker = results[1];
       let tickerAsk = ticker[Object.keys(ticker)[0]].a[0];
-      
-      let etherBalance = results[0].XETH;
-      let exchangeRate = _.round(tickerAsk, 4);
-      let depositValue = etherBalance * exchangeRate;
-      let plottedChart = chart.update(pastExchangeRate, exchangeRate, userConfig.chart.width, userConfig.chart.height);
+      lastFetch.exchangeRate = _.round(tickerAsk, 4);
+
+      if (balancePromise) {
+        lastFetch.etherBalance = results[0].XETH;
+        lastFetch.depositValue = lastFetch.etherBalance * lastFetch.exchangeRate;
+      }
+
+      let plottedChart = chart.update(pastExchangeRate, lastFetch.exchangeRate, userConfig.chart.width, userConfig.chart.height);
 
       lastFetch.plottedChart = plottedChart;
-      lastFetch.exchangeRate = exchangeRate;
-      lastFetch.etherBalance = etherBalance;
-      lastFetch.depositValue = depositValue;
 
       if (userConfig.logEnabled) { Logger.save(lastFetch); }
 
       updateInterface(false, 'GOOD');
   }, function(errors) {
-      updateInterface(true, erros);
+      updateInterface(true, errors);
   });
 }
 
@@ -124,9 +125,14 @@ function updateInterface(isError, status) {
 
   print.header(timeStamp + daysToGoNotificatoin + '\n');
   print.white(lastFetch.plottedChart + '\n');
-  print.info(`Exchange  (${userConfig.zCurrency} to ETH)  ` + lastFetch.exchangeRate);
-  print.info('Balance   (ETH)         '                     + lastFetch.etherBalance);
-  print.info(`Balance   (${userConfig.zCurrency})         ` + lastFetch.depositValue + '\n');
+
+  if (userConfig.kraken.api_key && userConfig.kraken.api_secret) {
+    print.info(`Exchange  (${userConfig.zCurrency} to ETH)  ` + lastFetch.exchangeRate);
+    print.info('Balance   (ETH)         ' + lastFetch.etherBalance);
+    print.info(`Balance   (${userConfig.zCurrency})         ` + lastFetch.depositValue + '\n');
+  } else {
+    print.info(`Exchange  (${userConfig.zCurrency} to ETH)  ` + lastFetch.exchangeRate + '\n');
+  }
 
   isError ? printInLine.red(`Error occurd, waiting for next sync \n ${status}`) :
             printInLine.green(`Status    ${status}`);

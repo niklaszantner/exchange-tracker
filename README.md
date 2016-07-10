@@ -2,6 +2,18 @@
 
 `ether-tracker` is a small nodejs based application to track Ethereum related information by utilising the APIs provided by kraken.com.
 
+### Table of Contents
+1. [Features](#features)
+2. [Changelog](#changelog)
+3. [Installation](#installation)
+4. [Kraken API](#kraken-api)
+5. [CLI](#cli)
+6. [Future Plans](#future-plans)
+7. [Security](#security)
+8. [Known Problems](#known-problems)
+9. [Copyright/Licensing](#copyrightlicensing)
+10. [Donate](#donate)
+
 ### Features
 - Timestamp of last update
 - Days until a year is gone since the purchase (can be useful concerning taxes)
@@ -28,6 +40,11 @@ This is how one could start the tracker:
 ```
 ether-tracker -k KEY -s SECRET  -c EUR -d 2016-01-13 -i 120 -l false
 ```
+Or without an API key and secret to only show the graph
+```
+ether-tracker -c EUR -i 10
+```
+
 The configuration is saved in 'config/user.config.json'. Everytime you update a config parameter, the old one gets overridden.
 
 All options can be found by using the help command:
