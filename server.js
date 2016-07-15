@@ -25,7 +25,7 @@ process.on('SIGINT', function () {
   process.exit();
 });
 
- /* ===== VARIABLES ===== */
+ /* ===== STARTUP ===== */
 const cli = runConfig.cli;
 const print = runConfig.print;
 const printInLine = runConfig.printInLine;
@@ -39,8 +39,10 @@ let lastFetch = {
   depositValue: '-'
 };
 
+init();
+
 /* ===== FUNCTIONS ===== */
-(function initialiser() {
+function init() {
   cursor.hide();
 
   if (fileExists(__dirname + '/config/user.config.json')) {
@@ -49,7 +51,11 @@ let lastFetch = {
 
   if (cli.print) {
     printConfig();
-    cursor.show().write('\n');
+    process.exit();
+  }
+
+  if (cli.reset) {
+    userConfig = {};
     process.exit();
   }
 
@@ -63,7 +69,7 @@ let lastFetch = {
   if (cli.chartHeight) { userConfig.chart.height = cli.chartHeight }
 
   validateConfig();
-})();
+}
 
 function validateConfig() {
   if (!userConfig.updateIntervall) { configError('updateIntervall') }

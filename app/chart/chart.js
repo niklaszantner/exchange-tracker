@@ -4,16 +4,17 @@ const _ = require('lodash');
 
 /* ===== VARIABLES ===== */
 let MIN_VALUE = 0;
+let Y_AXIS_DESCRIPTION_WIDTH = 12;
 
 /* ===== EXPOSE `chart()` ===== */
 module.exports.draw = draw;
 module.exports.update = update;
 
-function update(data, dataSet, width, height) {
-  if (data.length >= ((width - 12) / 2)) { data.shift(); }
+function update(data, dataSet, outerWidth, height) {
+  if (data.length >= ((outerWidth - Y_AXIS_DESCRIPTION_WIDTH) / 2)) { data.shift(); }
   data.push(dataSet);
 
-  return draw(data, width, height, relativeMinValue(data, 4));
+  return draw(data, outerWidth, height, relativeMinValue(data, 4));
 }
 
 function draw(data, width, height, minValue) {
@@ -30,7 +31,7 @@ function draw(data, width, height, minValue) {
 
   // prefill output matrix
   for (let y = 0; y < height; y++) {
-    output[y] = _.fill(Array(width), ' ');
+    output[y] = _.fill(new Array(width), ' ');
   }
 
   // set y-axis labels
@@ -53,10 +54,10 @@ function draw(data, width, height, minValue) {
 
   // plot data
   let currentXYPosition = labelWidth + labelPadding + 2;
-  _.forEach(data, function(dataValue) {
-    dataValue = dataValue - minValue;
+  _.forEach(data, function(currentvalue) {
+    currentvalue = currentvalue - minValue;
 
-    let relativeHeight = Math.round((height - 2) * (dataValue / (maxValue - minValue)));
+    let relativeHeight = Math.round((height - 2) * (currentvalue / (maxValue - minValue)));
     let color = relativeHeight < 0 ? ' ' : '█';
 
     if (relativeHeight < 0) { relativeHeight = -relativeHeight; }
@@ -82,21 +83,15 @@ function relativeMinValue(data, zoom) {
   const defaultZoom = 0.9;
 
   if (data.length === 1) {
-    MIN_VALUE = Math.floor(data[0] * defaultZoom);
+    MIN_VALUE = _.floor(data[0] * defaultZoom);
   } else {
     let delta = Math.abs(data[data.length - 1] - data[data.length - 2]);
-    minBase = _.min([data[data.length - 2], data[data.length - 1]]);
+    let minBase = _.min([data[data.length - 2], data[data.length - 1]]);
 
-    if (delta === 0) {
-      return MIN_VALUE;
-    } else if (MIN_VALUE > _.min(data)) {
-      MIN_VALUE = _.min(data) * defaultZoom;
-      console.log(MIN_VALUE);
-    } else {
-      MIN_VALUE = minBase - zoom * delta;
+    if (delta != 0) {
+      MIN_VALUE = ((minBase > _.min(data)) ? _.min(data) : minBase) - zoom * delta;
     }
   }
 
-  MIN_VALUE = _.round(MIN_VALUE, 4);
-  return MIN_VALUE;
+  return _.round(MIN_VALUE, 4);
 }

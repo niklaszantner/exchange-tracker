@@ -9,6 +9,7 @@ const debugEnabled = true;
 cli
   .version('0.1.5')
   .option('-p, --print', 'print the current configuration')
+  .option('-r --reset', 'reset the current configuration')
   .option('-i, --intervall [time of intervall]', 'update intervall in seconds')
   .option('-d, --day [day bought]', 'day bought')
   .option('-k, --key [kraken key]', 'your kraken key')

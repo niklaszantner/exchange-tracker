@@ -36,5 +36,5 @@ function formatBody(data) {
 }
 
 function formatHeader(data) {
-  return `timeStamp, exchangeRate, etherBalance, depositValue\n`;
+  return `timeStamp,exchangeRate,etherBalance,depositValue\n`;
 }
