@@ -1,6 +1,6 @@
 ### Changelog
 
-#### 15.07.2016 1.1.0
+#### 17.07.2016 1.1.0
 - refactored and modularized pretty much all of the core functionality
 - added a logging function which can be enabled by using the `-l true` flag and generates a `/.ether-tracker.log.csv` file in your home folder. Could be useful for message learning purposes / prediction markets.
 - improvements to the handling of the zoom into the data, depending on the past data. From now on, the smallest number in the current data is at least the smallest in the chart - no more negative plotted data.
