@@ -12,6 +12,7 @@ const chart = require('./app/chart/chart.js');
 const cursor = require('ansi')(process.stdout);
 const krakenService = require('./app/kraken/kraken.service');
 const Logger = require('./app/logger/logger.service');
+const userSettingsDir = require('user-settings-dir')();
 
 /* ===== DEFAULT CONFIG ===== */
 const runConfig = require("./app/config/run.config.js");
@@ -45,8 +46,8 @@ init();
 function init() {
   cursor.hide();
 
-  if (fileExists(__dirname + '/config/user.config.json')) {
-    userConfig = jsonFile.readFileSync(__dirname + '/config/user.config.json');
+  if (fileExists(userSettingsDir + '/.ether-tracker.config.json')) {
+    userConfig = jsonFile.readFileSync(userSettingsDir + '/.ether-tracker.config.json');
   }
 
   if (cli.print) {
@@ -77,14 +78,12 @@ function validateConfig() {
   if (!userConfig.chart.width) { configError('chartWidth') }
   if (!userConfig.chart.height) { configError('chartHeight') }
 
-  if (!runConfig.debugEnabled) {
-    jsonFile.writeFile(__dirname + '/config/user.config.json', userConfig, function(error) {
-      if (error) {
-        print.error('Could no write into file \n' + error);
-        process.exit();
-      }
-    })
-  }
+  jsonFile.writeFile(userSettingsDir + '/.ether-tracker.config.json', userConfig, function(error) {
+    if (error) {
+      print.error('Could no write into file \n' + error);
+      process.exit();
+    }
+  });
 
   getCurrrentData();
   setInterval(getCurrrentData, userConfig.updateIntervall * 1000);
@@ -140,7 +139,7 @@ function updateInterface(isError, status) {
     print.info(`Exchange  (${userConfig.zCurrency} to ETH)  ` + lastFetch.exchangeRate + '\n');
   }
 
-  isError ? printInLine.red(`Error occurd, waiting for next sync \n ${status}`) :
+  isError ? printInLine.red(`Error occurred, waiting for next sync \n ${status}`) :
             printInLine.green(`Status    ${status}`);
 }
 
@@ -161,7 +160,7 @@ function isCurrency(currency) {
 
 function configError(config) {
   print.error(`Configuration error: ${config} is missing, aborting.\n`
-            + `Please have look at the README or your user.config in the config folder.`);
+            + `Please have look at the README or your .ether-tracker.config.json in your home folder.`);
   process.exit();
 }
 

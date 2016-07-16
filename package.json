@@ -20,7 +20,8 @@
     "kraken-api": "^0.1.7",
     "lodash": "^4.11.1",
     "moment": "^2.13.0",
-    "q": "^1.4.1"
+    "q": "^1.4.1",
+    "user-settings-dir": "0.0.3"
   },
   "bin": {
     "ether-tracker": "./server.js"

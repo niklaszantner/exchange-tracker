@@ -4,6 +4,7 @@ const fileExists = require('file-exists');
 const fs = require('fs');
 const moment = require('moment');
 const runConfig = require("../config/run.config.js");
+const userSettingsDir = require('user-settings-dir')();
 
 /* ===== CONFIG ===== */
 const print = runConfig.print;
@@ -12,7 +13,7 @@ const print = runConfig.print;
 module.exports.save = save;
 
 function save(data) {
-  let path = __dirname + '/log.csv';
+  let path = userSettingsDir + '/.ether-tracker.log.csv';
 
   if (fileExists(path)) {
     let string = formatBody(data);

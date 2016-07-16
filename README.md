@@ -51,7 +51,7 @@ Or without an API key and secret to only show the graph without your balance:
 ether-tracker -c EUR -i 10
 ```
 
-The configuration is saved in 'config/user.config.json'. Everytime you update a 
+The configuration is saved in `.ether-tracker.config.json` in your home folder. Everytime you update a 
 config parameter, the old one gets overridden.
 
 All options can be found by using the help command:
@@ -77,7 +77,6 @@ Usage: ether-tracker
     -w, --chartWidth [width of chart]    width of the chart in chars
     -h, --chartHeight [height of chart]  height of the chart in chars
     -l, --log [true or false]            enables or disables the log
-
 ```
 
 Format for day: `YYYY-MM-DD`
