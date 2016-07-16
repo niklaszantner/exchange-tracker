@@ -88,7 +88,7 @@ function relativeMinValue(data, zoom) {
     let delta = Math.abs(data[data.length - 1] - data[data.length - 2]);
     let minBase = _.min([data[data.length - 2], data[data.length - 1]]);
 
-    if (delta != 0) {
+    if (delta !== 0) {
       MIN_VALUE = ((minBase > _.min(data)) ? _.min(data) : minBase) - zoom * delta;
     }
   }
