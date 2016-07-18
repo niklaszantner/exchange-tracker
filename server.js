@@ -46,18 +46,28 @@ init();
 function init() {
   cursor.hide();
 
-  if (fileExists(userSettingsDir + '/.ether-tracker.config.json')) {
-    userConfig = jsonFile.readFileSync(userSettingsDir + '/.ether-tracker.config.json');
-  }
+  loadConfigIfExists(userSettingsDir + '/.ether-tracker.config.json')
+    .then((data) => { if (data) { userConfig = data; }})
+    .finally(cliHandler);
+}
 
+function loadConfigIfExists(file) {
+  let deferred = q.defer();
+  (fileExists(file)) ? deferred.resolve(jsonFile.readFileSync(file)) : deferred.reject();
+  return deferred.promise;
+}
+
+function cliHandler() {
   if (cli.print) {
     printConfig();
     process.exit();
   }
 
   if (cli.reset) {
-    userConfig = {};
-    process.exit();
+    storeConfig(userSettingsDir + '/.ether-tracker.config.json', runConfig.userConfig)
+      .then(print.info('Reset user config'))
+      .catch(print.error('Could not reset user config'))
+      .finally(process.exit());
   }
 
   if (cli.log) { userConfig.logEnabled = Boolean(cli.log) }
@@ -78,12 +88,7 @@ function validateConfig() {
   if (!userConfig.chart.width) { configError('chartWidth') }
   if (!userConfig.chart.height) { configError('chartHeight') }
 
-  jsonFile.writeFile(userSettingsDir + '/.ether-tracker.config.json', userConfig, function(error) {
-    if (error) {
-      print.error('Could no write into file \n' + error);
-      process.exit();
-    }
-  });
+  storeConfig(userSettingsDir + '/.ether-tracker.config.json', userConfig);
 
   getCurrrentData();
   setInterval(getCurrrentData, userConfig.updateIntervall * 1000);
@@ -141,6 +146,15 @@ function updateInterface(isError, status) {
 
   isError ? printInLine.red(`Error occurred, waiting for next sync \n ${status}`) :
             printInLine.green(`Status    ${status}`);
+}
+
+function storeConfig(file, data) {
+  return jsonFile.writeFile(file, data, function(error) {
+    if (error) {
+      print.error('Could no write into file \n' + error);
+      process.exit();
+    }
+  });
 }
 
 function printConfig() {
