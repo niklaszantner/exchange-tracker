@@ -7,7 +7,7 @@ const debugEnabled = false;
 
 /* ===== CLI CONFIG ===== */
 cli
-  .version("1.2.0")
+  .version("1.3.1")
   .option("-p, --print", "print the current configuration")
   .option("-r --reset", "reset the current configuration")
   .option("-i, --intervall [time of intervall]", "update intervall in seconds")
