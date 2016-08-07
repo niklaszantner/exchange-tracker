@@ -75,7 +75,7 @@ function deleteConfig(file) {
 }
 
 function printConfig(userConfig) {
-  print.info("Currently loaded configuration:")
+  print.info("Currently loaded configuration:");
   print.white("Update interval:    " + userConfig.updateIntervall + " seconds");
   print.white("Exchange currency:   " + userConfig.zCurrency);
   print.white("Chart width:         " + userConfig.chart.width);

@@ -1,14 +1,14 @@
 /* ===== NPM  DEPENDENCIES ===== */
-const krakenAPI = require("kraken-api");
+const KrakenAPI = require("kraken-api");
 
 /* ===== EXPOSE `chart()` ===== */
 module.exports.exchangeService = exchangeService;
 
 function exchangeService(apiKey, apiSecret, apiCall, options) {
-  const Kraken = new krakenAPI(apiKey, apiSecret);
+  const kraken = new KrakenAPI(apiKey, apiSecret);
 
   return new Promise(function (fulfill, reject) {
-    Kraken.api(apiCall, options, function(error, data) {
+    kraken.api(apiCall, options, function(error, data) {
       (error) ? reject(error) : fulfill(data.result);
     });
   });
