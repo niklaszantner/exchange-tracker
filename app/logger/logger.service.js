@@ -1,5 +1,4 @@
 /* ===== NPM  DEPENDENCIES ===== */
-const _ = require("lodash");
 const fileExists = require("file-exists");
 const fs = require("fs");
 const moment = require("moment");
@@ -22,7 +21,7 @@ function save(data) {
       if (err) { print.red("Could not append log to file") }
     });
   } else {
-    let string = formatHeader(data) + formatBody(data);
+    let string = formatHeader() + formatBody(data);
 
     fs.writeFile(path, string, function (err) {
       if (err) {
@@ -33,9 +32,9 @@ function save(data) {
 }
 
 function formatBody(data) {
-  return `"${moment().format("YY.MM.DD_HH:mm:ss")}",${data.exchangeRate},${data.etherBalance},${data.depositValue}\n`
+  return `"${moment().format("YY.MM.DD_HH:mm:ss")}",${data.exchangeRate},${data.etherBalance},${data.depositValue}\n`;
 }
 
-function formatHeader(data) {
+function formatHeader() {
   return "timeStamp,exchangeRate,etherBalance,depositValue\n";
 }

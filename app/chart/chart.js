@@ -1,6 +1,6 @@
 /* ===== NPM  DEPENDENCIES ===== */
-const matrix = require('array-matrix');
-const _ = require('lodash');
+const matrix = require("array-matrix");
+const _ = require("lodash");
 
 /* ===== VARIABLES ===== */
 let MIN_VALUE = 0;
@@ -31,25 +31,25 @@ function draw(data, width, height, minValue) {
 
   // prefill output matrix
   for (let y = 0; y < height; y++) {
-    output[y] = _.fill(new Array(width), ' ');
+    output[y] = _.fill(new Array(width), " ");
   }
 
   // set y-axis labels
   for (let i = 0; i < labelWidth; i++) {
-    output[0][i] = maxLabel[i] ? maxLabel[i] : ' ';
-    output[height - 1][i] = minLabel[i] ? minLabel[i] : ' ';
+    output[0][i] = maxLabel[i] ? maxLabel[i] : " ";
+    output[height - 1][i] = minLabel[i] ? minLabel[i] : " ";
   }
 
   // set y-axis
   for (let currentY = 0; currentY < height; currentY++) {
-    output[currentY][labelWidth + labelPadding] = '․';
+    output[currentY][labelWidth + labelPadding] = "․";
   }
 
   // set x-axis
   let currentX = labelWidth + labelPadding;
   while (currentX < width) {
-    output[height - 1][currentX++] = '․';
-    output[height - 1][currentX++] = ' ';
+    output[height - 1][currentX++] = "․";
+    output[height - 1][currentX++] = " ";
   }
 
   // plot data
@@ -58,7 +58,7 @@ function draw(data, width, height, minValue) {
     currentvalue = currentvalue - minValue;
 
     let relativeHeight = Math.round((height - 2) * (currentvalue / (maxValue - minValue)));
-    let color = relativeHeight < 0 ? ' ' : '█';
+    let color = relativeHeight < 0 ? " " : "█";
 
     if (relativeHeight < 0) { relativeHeight = -relativeHeight; }
 
@@ -74,8 +74,8 @@ function draw(data, width, height, minValue) {
 
 function matrixToString(output) {
   let buffer = [];
-  _.forEach(output, char => buffer.push(char.join('')));
-  return buffer.join('\n');
+  _.forEach(output, char => buffer.push(char.join("")));
+  return buffer.join("\n");
 }
 
 /* ===== HELPER FUNCTIONS ===== */
