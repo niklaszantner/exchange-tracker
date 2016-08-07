@@ -1,6 +1,6 @@
 ### Changelog
 
-#### 07.08.2016 1.2.0
+#### 07.08.2016 1.3.3
 - refactored and modularized more parts of the program also deleted a lot of stuff
 - integrated and fixed all suggestions by [codacy](https://www.codacy.com)
 
