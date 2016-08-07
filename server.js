@@ -99,26 +99,28 @@ function getCurrrentData() {
     balancePromise = krakenService.exchangeService(userConfig.kraken.api_key, userConfig.kraken.api_secret, "Balance", null);
   }
 
-  q.all([balancePromise, tickerPromise]).then(function(results) {
-      let ticker = results[1];
-      let tickerAsk = ticker[Object.keys(ticker)[0]].a[0];
-      lastFetch.exchangeRate = _.round(tickerAsk, 4);
+  q.all([balancePromise, tickerPromise]).then(successHandler, errors => updateInterface(true, errors));
+}
 
-      if (balancePromise) {
-        lastFetch.etherBalance = results[0].XETH;
-        lastFetch.depositValue = lastFetch.etherBalance * lastFetch.exchangeRate;
-      }
+function successHandler(results) {
+  let ticker = results[1];
+  let tickerAsk = ticker[Object.keys(ticker)[0]].a[0];
+  lastFetch.exchangeRate = _.round(tickerAsk, 4);
 
-      let plottedChart = chart.update(pastExchangeRate, lastFetch.exchangeRate, userConfig.chart.width, userConfig.chart.height);
+  if (balancePromise) {
+    lastFetch.etherBalance = results[0].XETH;
+    lastFetch.depositValue = lastFetch.etherBalance * lastFetch.exchangeRate;
+  }
 
-      lastFetch.plottedChart = plottedChart;
+  let plottedChart = chart.update(pastExchangeRate, lastFetch.exchangeRate, userConfig.chart.width, userConfig.chart.height);
 
-      if (userConfig.logEnabled) { Logger.save(lastFetch); }
+  lastFetch.plottedChart = plottedChart;
 
-      updateInterface(false, "GOOD");
-  }, function(errors) {
-      updateInterface(true, errors);
-  });
+  if (userConfig.logEnabled) {
+    Logger.save(lastFetch);
+  }
+
+  updateInterface(false, "GOOD");
 }
 
 function updateInterface(isError, status) {
