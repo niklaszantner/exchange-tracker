@@ -60,19 +60,17 @@ function cliHandler() {
 
   if (cli.reset) {
     UserConfigService.deleteConfig(userSettingsDir + "/.ether-tracker.config.json")
-      .then(() => { print.info("Reset user config"); })
-      .catch(() => { print.error("Could not reset user config"); })
-      .finally(process.exit);
+      .finally(process.exit());
   }
 
-  if (cli.log) { userConfig.logEnabled = Boolean(cli.log) }
-  if (cli.intervall) { userConfig.updateIntervall = cli.intervall }
-  if (cli.day) { userConfig.dayBought = cli.day }
-  if (cli.key) { userConfig.kraken.api_key = cli.key }
-  if (cli.secret) { userConfig.kraken.api_secret = cli.secret }
-  if (cli.currency) { userConfig.zCurrency = UserConfigService.isValidCurrency(cli.currency) ? cli.currency : undefined }
-  if (cli.chartWidth) { userConfig.chart.width = cli.chartWidth }
-  if (cli.chartHeight) { userConfig.chart.height = cli.chartHeight }
+  if (cli.log) { userConfig.logEnabled = Boolean(cli.log); }
+  if (cli.intervall) { userConfig.updateIntervall = cli.intervall; }
+  if (cli.day) { userConfig.dayBought = cli.day; }
+  if (cli.key) { userConfig.kraken.API_KEY = cli.key; }
+  if (cli.secret) { userConfig.kraken.API_SECRET = cli.secret; }
+  if (cli.currency) { userConfig.zCurrency = UserConfigService.isValidCurrency(cli.currency) ? cli.currency : undefined; }
+  if (cli.chartWidth) { userConfig.chart.width = cli.chartWidth; }
+  if (cli.chartHeight) { userConfig.chart.height = cli.chartHeight; }
 
   UserConfigService.validateConfig(userConfig).then(runTracker, shutDownTracker);
 }
@@ -95,8 +93,8 @@ function getCurrrentData() {
   const tickerPromise = krakenService.exchangeService(null, null, "Ticker", {"pair": exchangeKey});
   let balancePromise = null;
 
-  if (userConfig.kraken.api_key && userConfig.kraken.api_secret) {
-    balancePromise = krakenService.exchangeService(userConfig.kraken.api_key, userConfig.kraken.api_secret, "Balance", null);
+  if (userConfig.kraken.API_KEY && userConfig.kraken.API_SECRET) {
+    balancePromise = krakenService.exchangeService(userConfig.kraken.API_KEY, userConfig.kraken.API_SECRET, "Balance", null);
   }
 
   q.all([balancePromise, tickerPromise]).then(
@@ -135,7 +133,7 @@ function updateInterface(isError, status) {
   print.header(timeStamp + daysToGoNotification + "\n");
   print.white(lastFetch.plottedChart + "\n");
 
-  if (userConfig.kraken.api_key && userConfig.kraken.api_secret) {
+  if (userConfig.kraken.API_KEY && userConfig.kraken.API_SECRET) {
     print.info(`Exchange  (${userConfig.zCurrency} to ETH)  ` + lastFetch.exchangeRate);
     print.info("Balance   (ETH)         " + lastFetch.etherBalance);
     print.info(`Balance   (${userConfig.zCurrency})         ` + lastFetch.depositValue + "\n");

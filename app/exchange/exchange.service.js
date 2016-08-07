@@ -1,5 +1,5 @@
 /* ===== NPM  DEPENDENCIES ===== */
-const _ = require('lodash');
+const _ = require("lodash");
 
 /* ===== EXPOSE `chart()` ===== */
 module.exports = exchangeService;

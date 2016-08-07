@@ -4,6 +4,7 @@ const fs = require("fs");
 const fileExists = require("file-exists");
 const jsonFile = require("jsonfile");
 const q = require("q");
+const print = require("./run.config.js").print;
 
 //////////
 
@@ -63,8 +64,10 @@ function deleteConfig(file) {
   let deferred = q.defer();
 
   if (fileExists(file)) {
-    deferred.resolve(fs.unlinkSync(file, function(err) {}));
+    print.info("Reset user config");
+    deferred.resolve(fs.unlinkSync(file));
   } else {
+    print.error("User config does not exist");
     deferred.reject(new Error("File could not be found"));
   }
 
@@ -72,19 +75,19 @@ function deleteConfig(file) {
 }
 
 function printConfig(userConfig) {
-  print.white("Update intervall:    " + userConfig.updateIntervall + " seconds");
+  print.info("Currently loaded configuration:")
+  print.white("Update interval:    " + userConfig.updateIntervall + " seconds");
   print.white("Exchange currency:   " + userConfig.zCurrency);
   print.white("Chart width:         " + userConfig.chart.width);
-  print.white("Chart heigh:         " + userConfig.chart.height);
-  print.white("API key:             " + userConfig.kraken.api_key);
-  print.white("API secret:          " + userConfig.kraken.api_secret);
+  print.white("Chart height:         " + userConfig.chart.height);
+  print.white("API key:             " + userConfig.kraken.API_KEY);
+  print.white("API secret:          " + userConfig.kraken.API_SECRET);
 }
 
 ///// HELPER FUNCTIONS  /////
 
 function configError(config) {
-  print.error(`Configuration error: ${config} is missing, aborting.\n`
-    + "Please have look at the README or your .ether-tracker.config.json in your home folder.");
+  print.error(`Configuration error: ${config} is missing, aborting.\n`);
 }
 
 function contains(array, subArray) {

@@ -26,8 +26,8 @@ cli
 /* ===== DEFAULT USER CONFIG */
 let defaultUserConfig = {
   kraken: {
-    api_key:    "",
-    api_secret: ""
+    API_KEY:    "",
+    API_SECRET: ""
   },
   updateIntervall: 60,
   dayBought: "",

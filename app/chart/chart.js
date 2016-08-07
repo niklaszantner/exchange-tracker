@@ -74,7 +74,7 @@ function draw(data, width, height, minValue) {
 
 function matrixToString(output) {
   let buffer = [];
-  _.forEach(output, char => buffer.push(char.join("")));
+  _.forEach(output, (char) => buffer.push(char.join("")));
   return buffer.join("\n");
 }
 

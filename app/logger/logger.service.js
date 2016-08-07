@@ -18,14 +18,14 @@ function save(data) {
     let string = formatBody(data);
 
     fs.appendFile(path, string, function(err) {
-      if (err) { print.red("Could not append log to file") }
+      if (err) { print.red("Could not append log to file"); }
     });
   } else {
     let string = formatHeader() + formatBody(data);
 
     fs.writeFile(path, string, function (err) {
       if (err) {
-        print.red("Could not write log to file")
+        print.red("Could not write log to file");
       }
     });
   }
