@@ -95,7 +95,7 @@ config file with your credentials, if one knows where to search for!
 ### Known Problems
 
 Sometimes it seems like the kraken API is a bit overwhelmed by all our love, so the 
-programm is not shutting down anymore, when an API call failed. But informs the user 
+program is not shutting down anymore, when an API call failed. But informs the user 
 and tries it again at the next interval.
 
 ### Copyright/Licensing

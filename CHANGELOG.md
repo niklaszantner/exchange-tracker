@@ -1,5 +1,9 @@
 ### Changelog
 
+#### 07.08.2016 1.2.0
+- refactored and modularized more parts of the program also deleted a lot of stuff
+- integrated and fixed all suggestions by [codacy](https://www.codacy.com)
+
 #### 17.07.2016 1.1.0
 - refactored and modularized pretty much all of the core functionality
 - added a logging function which can be enabled by using the `-l true` flag and generates a `/.ether-tracker.log.csv` file in your home folder. Could be useful for message learning purposes / prediction markets.
