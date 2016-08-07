@@ -12,6 +12,7 @@ const cursor = require('ansi')(process.stdout);
 const krakenService = require('./app/kraken/kraken.service');
 const Logger = require('./app/logger/logger.service');
 const userSettingsDir = require('user-settings-dir')();
+const UserConfigService = require('./app/config/userConfig.service');
 
 /* ===== DEFAULT CONFIG ===== */
 const runConfig = require("./app/config/run.config.js");
@@ -46,19 +47,19 @@ init();
 function init() {
   cursor.hide();
 
-  loadConfigIfExists(userSettingsDir + '/.ether-tracker.config.json')
+  UserConfigService.loadConfigIfExists(userSettingsDir + '/.ether-tracker.config.json')
     .then((data) => { if (data) { userConfig = data; }})
     .finally(cliHandler);
 }
 
 function cliHandler() {
   if (cli.print) {
-    printConfig();
+    UserConfigService.printConfig();
     process.exit();
   }
 
   if (cli.reset) {
-    deleteConfig(userSettingsDir + '/.ether-tracker.config.json')
+    UserConfigService.deleteConfig(userSettingsDir + '/.ether-tracker.config.json')
       .then(() => { print.info('Reset user config') })
       .catch(() => { print.error('Could not reset user config') })
       .finally(process.exit());
@@ -69,23 +70,23 @@ function cliHandler() {
   if (cli.day) { userConfig.dayBought = cli.day }
   if (cli.key) { userConfig.kraken.api_key = cli.key }
   if (cli.secret) { userConfig.kraken.api_secret = cli.secret }
-  if (cli.currency) { userConfig.zCurrency = isCurrency(cli.currency) ? cli.currency : undefined }
+  if (cli.currency) { userConfig.zCurrency = UserConfigService.isValidCurrency(cli.currency) ? cli.currency : undefined }
   if (cli.chartWidth) { userConfig.chart.width = cli.chartWidth }
   if (cli.chartHeight) { userConfig.chart.height = cli.chartHeight }
 
-  validateConfig();
+  UserConfigService.validateConfig(userConfig).then(runTracker, shutDownTracker);
 }
 
-function validateConfig() {
-  if (!userConfig.updateIntervall) { configError('updateIntervall') }
-  if (!userConfig.zCurrency) { configError('zCurrency') }
-  if (!userConfig.chart.width) { configError('chartWidth') }
-  if (!userConfig.chart.height) { configError('chartHeight') }
-
-  storeConfig(userSettingsDir + '/.ether-tracker.config.json', userConfig);
+function runTracker() {
+  UserConfigService.storeConfig(userSettingsDir + '/.ether-tracker.config.json', userConfig);
 
   getCurrrentData();
   setInterval(getCurrrentData, userConfig.updateIntervall * 1000);
+}
+
+function shutDownTracker() {
+  print.error(`Please have look at the README or your .ether-tracker.config.json in your home folder.`);
+  process.exit();
 }
 
 // get currentValue of owned eth in euro
@@ -124,10 +125,10 @@ function updateInterface(isError, status) {
   clearBash();
 
   let timeStamp = moment().format('DD.MM.YY HH:mm:ss');
-  let daysToGoNotificatoin = (!_.isEmpty(userConfig.dayBought)) ?
+  let daysToGoNotification = (!_.isEmpty(userConfig.dayBought)) ?
           ' | Days to go: ' + (365 + moment(userConfig.dayBought).diff(moment(), 'days')) : '';
 
-  print.header(timeStamp + daysToGoNotificatoin + '\n');
+  print.header(timeStamp + daysToGoNotification + '\n');
   print.white(lastFetch.plottedChart + '\n');
 
   if (userConfig.kraken.api_key && userConfig.kraken.api_secret) {
@@ -142,19 +143,7 @@ function updateInterface(isError, status) {
             printInLine.green(`Status    ${status}`);
 }
 
-function isCurrency(currency) {
-  let currencies = ['CAD','EUR','GBP','JPY','USD','CAD','EUR','USD','XBT','LTC',
-                    'NMC','XDG','XLM','XRP'];
-  return contains(currencies, currency);
-}
-
-function configError(config) {
-  print.error(`Configuration error: ${config} is missing, aborting.\n`
-            + `Please have look at the README or your .ether-tracker.config.json in your home folder.`);
-  process.exit();
-}
-
-/* ===== HELPER FUNCTIONS ===== */
+///// HELPER FUNCTIONS /////
 
 function contains(array, subArray) {
   return array.indexOf(subArray) > -1;
