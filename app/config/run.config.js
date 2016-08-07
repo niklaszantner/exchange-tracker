@@ -1,13 +1,14 @@
 /* ===== NPM PACKAGES ===== */
 const cli = require("commander");
 const chalk = require("chalk");
+const packageVersion = require('../../package.json').version;
 
 /* ===== DEBUG CONFIG ===== */
 const debugEnabled = false;
 
 /* ===== CLI CONFIG ===== */
 cli
-  .version("1.3.1")
+  .version(`${packageVersion}`)
   .option("-p, --print", "print the current configuration")
   .option("-r --reset", "reset the current configuration")
   .option("-i, --intervall [time of intervall]", "update intervall in seconds")
