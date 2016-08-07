@@ -1,7 +1,7 @@
 /* ===== NPM PACKAGES ===== */
 const cli = require("commander");
 const chalk = require("chalk");
-const packageVersion = require('../../package.json').version;
+const packageVersion = require("../../package.json").version;
 
 /* ===== DEBUG CONFIG ===== */
 const debugEnabled = false;
