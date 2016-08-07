@@ -1,5 +1,5 @@
 /* ===== NPM  DEPENDENCIES ===== */
-const krakenAPI = require('kraken-api');
+const krakenAPI = require("kraken-api");
 
 /* ===== EXPOSE `chart()` ===== */
 module.exports.exchangeService = exchangeService;

@@ -1,28 +1,28 @@
 #!/usr/bin/env node
 
 /* ===== NPM AND LOCAL DEPENDENCIES ===== */
-const _ = require('lodash');
-const q = require('q');
-const moment = require('moment');
-const clearBash = require('clear');
-const jsonFile = require('jsonfile');
-const fs = require('fs');
-const chart = require('./app/chart/chart.js');
-const cursor = require('ansi')(process.stdout);
-const krakenService = require('./app/kraken/kraken.service');
-const Logger = require('./app/logger/logger.service');
-const userSettingsDir = require('user-settings-dir')();
-const UserConfigService = require('./app/config/userConfig.service');
+const _ = require("lodash");
+const q = require("q");
+const moment = require("moment");
+const clearBash = require("clear");
+const jsonFile = require("jsonfile");
+const fs = require("fs");
+const chart = require("./app/chart/chart.js");
+const cursor = require("ansi")(process.stdout);
+const krakenService = require("./app/kraken/kraken.service");
+const Logger = require("./app/logger/logger.service");
+const userSettingsDir = require("user-settings-dir")();
+const UserConfigService = require("./app/config/userConfig.service");
 
 /* ===== DEFAULT CONFIG ===== */
 const runConfig = require("./app/config/run.config.js");
 const exchangeConfig = require("./app/config/exchange.config.js");
 
-process.on('exit', function () {
-  cursor.show().write('\n');
+process.on("exit", function () {
+  cursor.show().write("\n");
 });
 
-process.on('SIGINT', function () {
+process.on("SIGINT", function () {
   process.exit();
 });
 
@@ -30,15 +30,15 @@ process.on('SIGINT', function () {
 const cli = runConfig.cli;
 const print = runConfig.print;
 const printInLine = runConfig.printInLine;
-let userConfig = runConfig.userConfig;
+let userConfig = runConfig.defaultUserConfig;
 let pastExchangeRate = [];
 jsonFile.spaces = 2;
 
 let lastFetch = {
-  plottedChart: '-',
-  exchangeRate: '-',
-  etherBalance: '-',
-  depositValue: '-'
+  plottedChart: "-",
+  exchangeRate: "-",
+  etherBalance: "-",
+  depositValue: "-"
 };
 
 init();
@@ -47,21 +47,21 @@ init();
 function init() {
   cursor.hide();
 
-  UserConfigService.loadConfigIfExists(userSettingsDir + '/.ether-tracker.config.json')
+  UserConfigService.loadConfigIfExists(userSettingsDir + "/.ether-tracker.config.json")
     .then((data) => { if (data) { userConfig = data; }})
     .finally(cliHandler);
 }
 
 function cliHandler() {
   if (cli.print) {
-    UserConfigService.printConfig();
+    UserConfigService.printConfig(userConfig);
     process.exit();
   }
 
   if (cli.reset) {
-    UserConfigService.deleteConfig(userSettingsDir + '/.ether-tracker.config.json')
-      .then(() => { print.info('Reset user config') })
-      .catch(() => { print.error('Could not reset user config') })
+    UserConfigService.deleteConfig(userSettingsDir + "/.ether-tracker.config.json")
+      .then(() => { print.info("Reset user config") })
+      .catch(() => { print.error("Could not reset user config") })
       .finally(process.exit());
   }
 
@@ -78,7 +78,7 @@ function cliHandler() {
 }
 
 function runTracker() {
-  UserConfigService.storeConfig(userSettingsDir + '/.ether-tracker.config.json', userConfig);
+  UserConfigService.storeConfig(userSettingsDir + "/.ether-tracker.config.json", userConfig);
 
   getCurrrentData();
   setInterval(getCurrrentData, userConfig.updateIntervall * 1000);
@@ -92,11 +92,11 @@ function shutDownTracker() {
 // get currentValue of owned eth in euro
 function getCurrrentData() {
   const exchangeKey = exchangeConfig.find(str => contains(str, userConfig.zCurrency));
-  const tickerPromise = krakenService.exchangeService(null, null, 'Ticker', {"pair": exchangeKey});
+  const tickerPromise = krakenService.exchangeService(null, null, "Ticker", {"pair": exchangeKey});
   let balancePromise = null;
 
   if (userConfig.kraken.api_key && userConfig.kraken.api_secret) {
-    balancePromise = krakenService.exchangeService(userConfig.kraken.api_key, userConfig.kraken.api_secret, 'Balance', null);
+    balancePromise = krakenService.exchangeService(userConfig.kraken.api_key, userConfig.kraken.api_secret, "Balance", null);
   }
 
   q.all([balancePromise, tickerPromise]).then(function(results) {
@@ -115,7 +115,7 @@ function getCurrrentData() {
 
       if (userConfig.logEnabled) { Logger.save(lastFetch); }
 
-      updateInterface(false, 'GOOD');
+      updateInterface(false, "GOOD");
   }, function(errors) {
       updateInterface(true, errors);
   });
@@ -124,19 +124,19 @@ function getCurrrentData() {
 function updateInterface(isError, status) {
   clearBash();
 
-  let timeStamp = moment().format('DD.MM.YY HH:mm:ss');
+  let timeStamp = moment().format("DD.MM.YY HH:mm:ss");
   let daysToGoNotification = (!_.isEmpty(userConfig.dayBought)) ?
-          ' | Days to go: ' + (365 + moment(userConfig.dayBought).diff(moment(), 'days')) : '';
+          " | Days to go: " + (365 + moment(userConfig.dayBought).diff(moment(), "days")) : "";
 
-  print.header(timeStamp + daysToGoNotification + '\n');
-  print.white(lastFetch.plottedChart + '\n');
+  print.header(timeStamp + daysToGoNotification + "\n");
+  print.white(lastFetch.plottedChart + "\n");
 
   if (userConfig.kraken.api_key && userConfig.kraken.api_secret) {
     print.info(`Exchange  (${userConfig.zCurrency} to ETH)  ` + lastFetch.exchangeRate);
-    print.info('Balance   (ETH)         ' + lastFetch.etherBalance);
-    print.info(`Balance   (${userConfig.zCurrency})         ` + lastFetch.depositValue + '\n');
+    print.info("Balance   (ETH)         " + lastFetch.etherBalance);
+    print.info(`Balance   (${userConfig.zCurrency})         ` + lastFetch.depositValue + "\n");
   } else {
-    print.info(`Exchange  (${userConfig.zCurrency} to ETH)  ` + lastFetch.exchangeRate + '\n');
+    print.info(`Exchange  (${userConfig.zCurrency} to ETH)  ` + lastFetch.exchangeRate + "\n");
   }
 
   isError ? printInLine.red(`Error occurred, waiting for next sync \n ${status}`) :
