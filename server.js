@@ -6,7 +6,6 @@ const q = require('q');
 const moment = require('moment');
 const clearBash = require('clear');
 const jsonFile = require('jsonfile');
-const fileExists = require('file-exists');
 const fs = require('fs');
 const chart = require('./app/chart/chart.js');
 const cursor = require('ansi')(process.stdout);
@@ -32,6 +31,7 @@ const print = runConfig.print;
 const printInLine = runConfig.printInLine;
 let userConfig = runConfig.userConfig;
 let pastExchangeRate = [];
+jsonFile.spaces = 2;
 
 let lastFetch = {
   plottedChart: '-',
@@ -51,12 +51,6 @@ function init() {
     .finally(cliHandler);
 }
 
-function loadConfigIfExists(file) {
-  let deferred = q.defer();
-  (fileExists(file)) ? deferred.resolve(jsonFile.readFileSync(file)) : deferred.reject();
-  return deferred.promise;
-}
-
 function cliHandler() {
   if (cli.print) {
     printConfig();
@@ -64,9 +58,9 @@ function cliHandler() {
   }
 
   if (cli.reset) {
-    storeConfig(userSettingsDir + '/.ether-tracker.config.json', runConfig.userConfig)
-      .then(print.info('Reset user config'))
-      .catch(print.error('Could not reset user config'))
+    deleteConfig(userSettingsDir + '/.ether-tracker.config.json')
+      .then(() => { print.info('Reset user config') })
+      .catch(() => { print.error('Could not reset user config') })
       .finally(process.exit());
   }
 
@@ -146,24 +140,6 @@ function updateInterface(isError, status) {
 
   isError ? printInLine.red(`Error occurred, waiting for next sync \n ${status}`) :
             printInLine.green(`Status    ${status}`);
-}
-
-function storeConfig(file, data) {
-  return jsonFile.writeFile(file, data, function(error) {
-    if (error) {
-      print.error('Could no write into file \n' + error);
-      process.exit();
-    }
-  });
-}
-
-function printConfig() {
-  print.white('Update intervall:    ' + userConfig.updateIntervall + ' seconds');
-  print.white('Exchange currency:   ' + userConfig.zCurrency);
-  print.white('Chart width:         ' + userConfig.chart.width);
-  print.white('Chart heigh:         ' + userConfig.chart.height);
-  print.white('API key:             ' + userConfig.kraken.api_key);
-  print.white('API secret:          ' + userConfig.kraken.api_secret);
 }
 
 function isCurrency(currency) {

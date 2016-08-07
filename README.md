@@ -85,7 +85,7 @@ Possible options for `exchangeKey`:
 `CAD` `EUR` `GBP` `JPY` `USD` `CAD` `EUR` `USD` `XBT` `LTC` `NMC` `XDG` `XLM` `XRP`
 
 ### Future Plans
-- chart only (so you don't need a kraken account)
+- ... 
 
 ### Security
 Be aware that your kraken API key and secret are not encrypted, but stored locally 
