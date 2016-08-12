@@ -24,7 +24,7 @@
     "user-settings-dir": "0.0.3"
   },
   "bin": {
-    "ether-tracker": "./server.js"
+    "exchange-tracker": "./server.js"
   },
   "preferGlobal": "true",
   "devDependencies": {},
@@ -33,6 +33,7 @@
     "url": "git+https://github.com/nobol/exchange-tracker.git"
   },
   "keywords": [
+    "bitcoin",
     "ethereum",
     "tracker",
     "bash",
