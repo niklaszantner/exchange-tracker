@@ -1,6 +1,6 @@
 #!/usr/bin/env node
 
-/* ===== NPM AND LOCAL DEPENDENCIES ===== */
+/* ===== DEPENDENCIES AND CONFIGS===== */
 const _ = require("lodash");
 const q = require("q");
 const moment = require("moment");
@@ -13,18 +13,7 @@ const krakenService = require("./app/kraken/kraken.service");
 const Logger = require("./app/logger/logger.service");
 const userSettingsDir = require("user-settings-dir")();
 const UserConfigService = require("./app/config/userConfig.service");
-
-/* ===== DEFAULT CONFIG ===== */
 const runConfig = require("./app/config/run.config.js");
-const exchangeConfig = require("./app/config/exchange.config.js");
-
-process.on("exit", function () {
-  cursor.show().write("\n");
-});
-
-process.on("SIGINT", function () {
-  process.exit();
-});
 
  /* ===== STARTUP ===== */
 const cli = runConfig.cli;
@@ -37,7 +26,7 @@ jsonFile.spaces = 2;
 let lastFetch = {
   plottedChart: "-",
   exchangeRate: "-",
-  etherBalance: "-",
+  balance: "-",
   depositValue: "-"
 };
 
@@ -45,9 +34,12 @@ init();
 
 /* ===== FUNCTIONS ===== */
 function init() {
+  process.on("exit", () => { cursor.show().write("\n"); } );
+  process.on("SIGINT", () => { process.exit(); });
+
   cursor.hide();
 
-  UserConfigService.loadConfigIfExists(userSettingsDir + "/.ether-tracker.config.json")
+  UserConfigService.loadConfigIfExists(userSettingsDir + "/.exchange-tracker.config.json")
     .then((data) => { if (data) { userConfig = data; }})
     .finally(cliHandler);
 }
@@ -59,7 +51,7 @@ function cliHandler() {
   }
 
   if (cli.reset) {
-    UserConfigService.deleteConfig(userSettingsDir + "/.ether-tracker.config.json")
+    UserConfigService.deleteConfig(userSettingsDir + "/.exchange-tracker.config.json")
       .finally(process.exit());
   }
 
@@ -68,7 +60,7 @@ function cliHandler() {
   if (cli.day) { userConfig.dayBought = cli.day; }
   if (cli.key) { userConfig.kraken.API_KEY = cli.key; }
   if (cli.secret) { userConfig.kraken.API_SECRET = cli.secret; }
-  if (cli.currency) { userConfig.zCurrency = UserConfigService.isValidCurrency(cli.currency) ? cli.currency : undefined; }
+  if (cli.exchangeKey) { userConfig.exchangeKey = cli.exchangeKey; }
   if (cli.chartWidth) { userConfig.chart.width = cli.chartWidth; }
   if (cli.chartHeight) { userConfig.chart.height = cli.chartHeight; }
 
@@ -76,21 +68,20 @@ function cliHandler() {
 }
 
 function runTracker() {
-  UserConfigService.storeConfig(userSettingsDir + "/.ether-tracker.config.json", userConfig);
+  UserConfigService.storeConfig(userSettingsDir + "/.exchange-tracker.config.json", userConfig);
 
   getCurrrentData();
   setInterval(getCurrrentData, userConfig.updateIntervall * 1000);
 }
 
 function shutDownTracker() {
-  print.error("Please have look at the README or your .ether-tracker.config.json in your home folder.");
+  print.error("Please have look at the README or your .exchange-tracker.config.json in your home folder.");
   process.exit();
 }
 
 // get currentValue of owned eth in euro
 function getCurrrentData() {
-  const exchangeKey = exchangeConfig.find((str) => contains(str, userConfig.zCurrency));
-  const tickerPromise = krakenService.exchangeService(null, null, "Ticker", {"pair": exchangeKey});
+  const tickerPromise = krakenService.exchangeService(null, null, "Ticker", {"pair": userConfig.exchangeKey});
   let balancePromise = null;
 
   if (userConfig.kraken.API_KEY && userConfig.kraken.API_SECRET) {
@@ -108,8 +99,8 @@ function successHandler(results, balancePromise) {
   lastFetch.exchangeRate = _.round(tickerAsk, 4);
 
   if (balancePromise) {
-    lastFetch.etherBalance = results[0].XETH;
-    lastFetch.depositValue = lastFetch.etherBalance * lastFetch.exchangeRate;
+    lastFetch.balance = results[0].XETH;
+    lastFetch.depositValue = lastFetch.balance * lastFetch.exchangeRate;
   }
 
   let plottedChart = chart.update(pastExchangeRate, lastFetch.exchangeRate, userConfig.chart.width, userConfig.chart.height);
@@ -134,19 +125,16 @@ function updateInterface(isError, status) {
   print.white(lastFetch.plottedChart + "\n");
 
   if (userConfig.kraken.API_KEY && userConfig.kraken.API_SECRET) {
-    print.info(`Exchange  (${userConfig.zCurrency} to ETH)  ` + lastFetch.exchangeRate);
-    print.info("Balance   (ETH)         " + lastFetch.etherBalance);
-    print.info(`Balance   (${userConfig.zCurrency})         ` + lastFetch.depositValue + "\n");
+    let fromCurrency = userConfig.exchangeKey.substring(1,4);
+    let toCurrency = userConfig.exchangeKey.substring(5,8);
+
+    print.info(`Exchange  (${fromCurrency} to ${toCurrency})  ` + lastFetch.exchangeRate);
+    print.info(`Balance   (${fromCurrency})         ` + lastFetch.balance);
+    print.info(`Balance   (${toCurrency})         ` + lastFetch.depositValue + "\n");
   } else {
-    print.info(`Exchange  (${userConfig.zCurrency} to ETH)  ` + lastFetch.exchangeRate + "\n");
+    print.info(`Exchange  (${fromCurrency} to ${toCurrency})  ` + lastFetch.exchangeRate + "\n");
   }
 
   isError ? printInLine.red(`Error occurred, waiting for next sync \n ${status}`) :
             printInLine.green(`Status    ${status}`);
-}
-
-///// HELPER FUNCTIONS /////
-
-function contains(array, subArray) {
-  return array.indexOf(subArray) > -1;
 }

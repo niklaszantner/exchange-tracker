@@ -1,10 +1,10 @@
 /* =====  DEPENDENCIES ===== */
-const _ = require("lodash");
 const fs = require("fs");
 const fileExists = require("file-exists");
 const jsonFile = require("jsonfile");
 const q = require("q");
 const print = require("./run.config.js").print;
+const exchangeConfig = require("./exchange.config.js");
 
 //////////
 
@@ -13,14 +13,12 @@ module.exports.loadConfigIfExists = loadConfigIfExists;
 module.exports.deleteConfig = deleteConfig;
 module.exports.printConfig = printConfig;
 module.exports.validateConfig = validateConfig;
-module.exports.isValidCurrency = isValidCurrency;
+module.exports.isValidExchangeKEy = isValidExchangeKey;
 
 //////////
 
-function isValidCurrency(currency) {
-  let currencies = ["CAD","EUR","GBP","JPY","USD","CAD","EUR","USD","XBT","LTC",
-    "NMC","XDG","XLM","XRP"];
-  return contains(currencies, currency);
+function isValidExchangeKey(exchangeKey) {
+  return exchangeConfig.includes(exchangeKey);
 }
 
 function validateConfig(userConfig) {
@@ -29,8 +27,8 @@ function validateConfig(userConfig) {
   if (!userConfig.updateIntervall) {
     configError("updateIntervall");
     deferred.reject(false);
-  } else if (!userConfig.zCurrency) {
-    configError("zCurrency");
+  } else if (!userConfig.exchangeKey && !isValidExchangeKey(userConfig.exchangeKey)) {
+    configError("exchangeKey");
     deferred.reject(false);
   } else if (!userConfig.chart.width) {
     configError("chartWidth");
@@ -79,7 +77,7 @@ function printConfig(userConfig) {
   print.white("Update interval:    " + userConfig.updateIntervall + " seconds");
   print.white("Exchange currency:   " + userConfig.zCurrency);
   print.white("Chart width:         " + userConfig.chart.width);
-  print.white("Chart height:         " + userConfig.chart.height);
+  print.white("Chart height:        " + userConfig.chart.height);
   print.white("API key:             " + userConfig.kraken.API_KEY);
   print.white("API secret:          " + userConfig.kraken.API_SECRET);
 }
@@ -88,8 +86,4 @@ function printConfig(userConfig) {
 
 function configError(config) {
   print.error(`Configuration error: ${config} is missing, aborting.\n`);
-}
-
-function contains(array, subArray) {
-  return array.indexOf(subArray) > -1;
 }

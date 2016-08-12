@@ -12,7 +12,7 @@ const print = runConfig.print;
 module.exports.save = save;
 
 function save(data) {
-  let path = userSettingsDir + "/.ether-tracker.log.csv";
+  let path = userSettingsDir + "/.exchange-tracker.log.csv";
 
   if (fileExists(path)) {
     let string = formatBody(data);
@@ -32,9 +32,9 @@ function save(data) {
 }
 
 function formatBody(data) {
-  return `"${moment().format("YY.MM.DD_HH:mm:ss")}",${data.exchangeRate},${data.etherBalance},${data.depositValue}\n`;
+  return `"${moment().format("YY.MM.DD_HH:mm:ss")}",${data.exchangeRate},${data.balance},${data.depositValue}\n`;
 }
 
 function formatHeader() {
-  return "timeStamp,exchangeRate,etherBalance,depositValue\n";
+  return "timeStamp,exchangeRate,balance,depositValue\n";
 }

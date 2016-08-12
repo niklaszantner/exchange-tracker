@@ -1,6 +1,6 @@
 ![screenshot](screenshot.png)
 
-`ether-tracker` is a small nodejs based application to track Ethereum related 
+`exchange-tracker` is a small nodejs based application to track crypto currencies related 
 information by utilising the APIs provided by kraken.com.
 
 ### Table of Contents
@@ -27,9 +27,9 @@ information by utilising the APIs provided by kraken.com.
 Have a look at the [CHANGELOG.md](CHANGELOG.md).
 
 ### Installation
-Simply via npm `npm install -g ether-tracker`.
+Simply via npm `npm install -g exchange-tracker`.
 
-And start the program by typing `ether-tracker` into your command line.
+And start the program by typing `exchange-tracker` into your command line.
 
 ### Kraken API
 To use this tracker you can specify a kraken API key and secret, so your current 
@@ -42,26 +42,31 @@ into your console like shown below.
 ### CLI
 The CLI provides some options to be set by user on the startup of the tracker.  
 
-This is how one could start the tracker:
+This is how one could start the tracker (the parameters are explained below):
 ```
-ether-tracker -k KEY -s SECRET  -c EUR -d 2016-01-13 -i 120 -l false
-```
-Or without an API key and secret to only show the graph without your balance:
-```
-ether-tracker -c EUR -i 10
+exchange-tracker -k KEY -s SECRET  -e XETHZEUR -d 2016-01-13 -i 60 -l false
 ```
 
-The configuration is saved in `.ether-tracker.config.json` in your home folder. Everytime you update a 
+Or without an API key and secret to only show the graph without your balance:
+```
+exchange-tracker -e XETHZEUR -i 60
+```
+
+The configuration is saved in `.exchange-tracker.config.json` in your home folder. Everytime you update a 
 config parameter, the old one gets overridden.
 
 All options can be found by using the help command:
 ```
-$ ether-tracker --help
+$ exchange-tracker --help
 
-Usage: ether-tracker
+  Usage: exchange-tracker 
 
-  Changelog: https://github.com/nobol/ether-tracker/blob/master/CHANGELOG.md
-  Readme:    https://github.com/nobol/ether-tracker/blob/master/README.md
+  Changelog: https://github.com/nobol/exchange-tracker/blob/master/CHANGELOG.md
+  Readme:    https://github.com/nobol/exchange-tracker/blob/master/README.md
+
+  Possible exchange keys: 
+  XETHZCAD,XETHZEUR,XETHZGBP,XETHZJPY,XETHZUSD,XLTCZCAD,XLTCZEUR
+  XLTCZUSD,XETHXXBT,XXBTXLTC,XXBTXNMC,XXBTXXDG,XXBTXXLM,XXBTXXRP
 
   Options:
 
@@ -73,19 +78,17 @@ Usage: ether-tracker
     -d, --day [day bought]               day bought
     -k, --key [kraken key]               your kraken key
     -s, --secret [kraken secret]         your kraken secret
-    -c, --currency [exchange currency]   currency to exchange, options in the README
+    -e, --exchangeKey [exchange key]     currencies to exchange, options in the README
     -w, --chartWidth [width of chart]    width of the chart in chars
     -h, --chartHeight [height of chart]  height of the chart in chars
     -l, --log [true or false]            enables or disables the log
+
 ```
 
 Format for day: `YYYY-MM-DD`
 
-Possible options for `exchangeKey`:  
-`CAD` `EUR` `GBP` `JPY` `USD` `CAD` `EUR` `USD` `XBT` `LTC` `NMC` `XDG` `XLM` `XRP`
-
 ### Future Plans
-- ... 
+- Support for more markets, e.g. Polonix
 
 ### Security
 Be aware that your kraken API key and secret are not encrypted, but stored locally 
@@ -96,7 +99,7 @@ config file with your credentials, if one knows where to search for!
 
 Sometimes it seems like the kraken API is a bit overwhelmed by all our love, so the 
 program is not shutting down anymore, when an API call failed. But informs the user 
-and tries it again at the next interval.
+and tries to reach the server again at the next interval.
 
 ### Copyright/Licensing
 ISC
