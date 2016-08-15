@@ -1,7 +1,7 @@
 ![screenshot](screenshot.png)
 
 `exchange-tracker` is a small nodejs based application to track crypto currencies related 
-information by utilising the APIs provided by kraken.com.
+information by utilising the APIs provided by kraken.com. This project is formerly know as `ether-tracker`.
 
 ### Table of Contents
 1. [Features](#features)
@@ -19,9 +19,13 @@ information by utilising the APIs provided by kraken.com.
 - Timestamp of last update
 - Days until a year is gone since the purchase (can be useful concerning taxes)
 - Graph of the last exchange rates
-- Current exchange (EUR to ETH)
-- Current balance (ETH)
-- Current balance (EUR)
+- Current exchange
+- Current balance
+- Supported currencies: 
+    - ETH, LTC, BT, RP, LM, DG, NMC - CAD, EUR, GBP, JPY, USD
+
+XETHZCAD,XETHZEUR,XETHZGBP,XETHZJPY,XETHZUSD,XLTCZCAD,XLTCZEUR
+  XLTCZUSD,XETHXXBT,XXBTXLTC,XXBTXNMC,XXBTXXDG,XXBTXXLM,XXBTXXRP
 
 ### Changelog
 Have a look at the [CHANGELOG.md](CHANGELOG.md).

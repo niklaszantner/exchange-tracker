@@ -1,9 +1,8 @@
 ### Changelog
 
 #### 12.08.2016 v2.0.0
-- **WARNING** your config file will break with this release!
+- Renaming the application to exchange-tracker
 - You can not only use this tracker for Ethereum from now on. Every exchange key on kraken is supported, a full list can be  found in th README.md and via the `-p` command. The README.md has been updated accordingly.
-- Renaming the application to echange-tracker
 - Git also changed
 
 #### 07.08.2016 v1.3.3
