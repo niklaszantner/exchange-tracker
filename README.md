@@ -21,10 +21,9 @@ information by utilising the APIs provided by kraken.com. This project is former
 - Graph of the last exchange rates
 - Current exchange
 - Current balance
-- Supported currencies: 
-    - ETH, LTC, BT, RP, LM, DG, NMC - CAD, EUR, GBP, JPY, USD
+- Supported exchange keys: 
 
-XETHZCAD,XETHZEUR,XETHZGBP,XETHZJPY,XETHZUSD,XLTCZCAD,XLTCZEUR
+  XETHZCAD,XETHZEUR,XETHZGBP,XETHZJPY,XETHZUSD,XLTCZCAD,XLTCZEUR
   XLTCZUSD,XETHXXBT,XXBTXLTC,XXBTXNMC,XXBTXXDG,XXBTXXLM,XXBTXXRP
 
 ### Changelog
