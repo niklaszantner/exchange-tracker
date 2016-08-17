@@ -117,6 +117,8 @@ function successHandler(results, balancePromise) {
 function updateInterface(isError, status) {
   clearBash();
 
+  let fromCurrency = userConfig.exchangeKey.substring(1,4);
+  let toCurrency = userConfig.exchangeKey.substring(5,8);
   let timeStamp = moment().format("DD.MM.YY HH:mm:ss");
   let daysToGoNotification = (!_.isEmpty(userConfig.dayBought)) ?
           " | Days to go: " + (365 + moment(userConfig.dayBought).diff(moment(), "days")) : "";
@@ -125,9 +127,6 @@ function updateInterface(isError, status) {
   print.white(lastFetch.plottedChart + "\n");
 
   if (userConfig.kraken.API_KEY && userConfig.kraken.API_SECRET) {
-    let fromCurrency = userConfig.exchangeKey.substring(1,4);
-    let toCurrency = userConfig.exchangeKey.substring(5,8);
-
     print.info(`Exchange  (${fromCurrency} to ${toCurrency})  ` + lastFetch.exchangeRate);
     print.info(`Balance   (${fromCurrency})         ` + lastFetch.balance);
     print.info(`Balance   (${toCurrency})         ` + lastFetch.depositValue + "\n");

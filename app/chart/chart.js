@@ -14,10 +14,14 @@ function update(data, dataSet, outerWidth, height) {
   if (data.length >= ((outerWidth - Y_AXIS_DESCRIPTION_WIDTH) / 2)) { data.shift(); }
   data.push(dataSet);
 
-  return plotData(drawEmptyChart(data, outerWidth, height, relativeMinValue(data, 4)));
+  return plotData(drawEmptyChart(data, outerWidth, height, relativeMinValue(data, 4)), data);
 }
 
 function drawEmptyChart(data, width, height, minValue) {
+  let maxValue = _.max(data) || 0;
+  let maxLabel = Math.abs(maxValue).toString();
+  let minLabel = Math.abs(minValue).toString();
+
   let chart = {
     width: width || 130,
     height: height || 30,
@@ -56,12 +60,13 @@ function drawEmptyChart(data, width, height, minValue) {
   return chart;
 }
 
-function plotData(chart) {
+function plotData(chart, data) {
   let currentXYPosition = chart.labelWidth + chart.labelPadding + 2;
-  _.forEach(chart.data, function(currentvalue) {
-    chart.currentvalue = chart.currentvalue - chart.minValue;
 
-    let relativeHeight = Math.round((chart.height - 2) * (currentvalue / (chart.maxValue - chart.minValue)));
+  _.forEach(data, function(currentValue) {
+    currentValue = currentValue - chart.minValue;
+
+    let relativeHeight = Math.round((chart.height - 2) * (currentValue / (chart.maxValue - chart.minValue)));
     let color = relativeHeight < 0 ? " " : "█";
 
     if (relativeHeight < 0) { relativeHeight = -relativeHeight; }
