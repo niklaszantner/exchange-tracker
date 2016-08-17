@@ -7,69 +7,73 @@ let MIN_VALUE = 0;
 let Y_AXIS_DESCRIPTION_WIDTH = 12;
 
 /* ===== EXPOSE `chart()` ===== */
-module.exports.draw = draw;
+module.exports.drawEmptyChart = drawEmptyChart;
 module.exports.update = update;
 
 function update(data, dataSet, outerWidth, height) {
   if (data.length >= ((outerWidth - Y_AXIS_DESCRIPTION_WIDTH) / 2)) { data.shift(); }
   data.push(dataSet);
 
-  return draw(data, outerWidth, height, relativeMinValue(data, 4));
+  return plotData(drawEmptyChart(data, outerWidth, height, relativeMinValue(data, 4)));
 }
 
-function draw(data, width, height, minValue) {
-  width = width || 130;
-  height = height || 30;
-  minValue = minValue || 0;
-
-  let output = matrix(width, height);
-  let maxValue = _.max(data) || 0;
-  let maxLabel = Math.abs(maxValue).toString();
-  let minLabel = Math.abs(minValue).toString();
-  let labelWidth = _.max([maxLabel.length, minLabel.length]);
-  let labelPadding = 1;
+function drawEmptyChart(data, width, height, minValue) {
+  let chart = {
+    width: width || 130,
+    height: height || 30,
+    minValue: minValue || 0,
+    output: matrix(width, height),
+    maxValue: _.max(data) || 0,
+    maxLabel: Math.abs(maxValue).toString(),
+    minLabel: Math.abs(minValue).toString(),
+    labelWidth: _.max([maxLabel.length, minLabel.length]),
+    labelPadding: 1,
+  };
 
   // prefill output matrix
   for (let y = 0; y < height; y++) {
-    output[y] = _.fill(new Array(width), " ");
+    chart.output[y] = _.fill(new Array(chart.width), " ");
   }
 
   // set y-axis labels
-  for (let i = 0; i < labelWidth; i++) {
-    output[0][i] = maxLabel[i] ? maxLabel[i] : " ";
-    output[height - 1][i] = minLabel[i] ? minLabel[i] : " ";
+  for (let i = 0; i < chart.labelWidth; i++) {
+    chart.output[0][i] = chart.maxLabel[i] ? chart.maxLabel[i] : " ";
+    chart.output[height - 1][i] = chart.minLabel[i] ? chart.minLabel[i] : " ";
   }
 
   // set y-axis
   for (let currentY = 0; currentY < height; currentY++) {
-    output[currentY][labelWidth + labelPadding] = "․";
+    chart.output[currentY][chart.labelWidth + chart.labelPadding] = "․";
   }
 
   // set x-axis
-  let currentX = labelWidth + labelPadding;
+  let currentX = chart.labelWidth + chart.labelPadding;
   while (currentX < width) {
-    output[height - 1][currentX++] = "․";
-    output[height - 1][currentX++] = " ";
+    chart.output[height - 1][currentX++] = "․";
+    chart.output[height - 1][currentX++] = " ";
   }
 
-  // plot data
-  let currentXYPosition = labelWidth + labelPadding + 2;
-  _.forEach(data, function(currentvalue) {
-    currentvalue = currentvalue - minValue;
+  return chart;
+}
 
-    let relativeHeight = Math.round((height - 2) * (currentvalue / (maxValue - minValue)));
+function plotData(chart) {
+  let currentXYPosition = chart.labelWidth + chart.labelPadding + 2;
+  _.forEach(chart.data, function(currentvalue) {
+    chart.currentvalue = chart.currentvalue - chart.minValue;
+
+    let relativeHeight = Math.round((chart.height - 2) * (currentvalue / (chart.maxValue - chart.minValue)));
     let color = relativeHeight < 0 ? " " : "█";
 
     if (relativeHeight < 0) { relativeHeight = -relativeHeight; }
 
     while (relativeHeight--) {
-      output[Math.abs(relativeHeight - height) - 2][currentXYPosition] = color;
+      chart.output[Math.abs(relativeHeight - chart.height) - 2][currentXYPosition] = color;
     }
 
     currentXYPosition += 2;
   });
 
-  return matrixToString(output, height);
+  return matrixToString(chart.output, chart.height);
 }
 
 function matrixToString(output) {
