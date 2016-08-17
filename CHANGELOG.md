@@ -1,5 +1,8 @@
 ### Changelog
 
+#### 17.08.2016 v2.0.3
+- found another small bug in the printConfig()
+
 #### 17.08.2016 v2.0.2
 - small changes and refactorings
 - bug fix concerning chart only
